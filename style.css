@@ -1,0 +1,116 @@
+:root {
+    --bg-color: #1e1e1e;
+    --text-color: #ffffff;
+    --secondary-text: #aaaaaa;
+    --hover-bg: #333333;
+    --border-color: #444444;
+    --accent-color: #2196f3;
+    --danger-color: #f44336;
+    --radius: 8px;
+    --spacing: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    width: 300px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    padding: var(--spacing);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.status-badge {
+    font-size: 12px;
+    background-color: var(--hover-bg);
+    padding: 4px 8px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+main {
+    flex: 1;
+    padding: var(--spacing);
+}
+
+.container-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.container-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--hover-bg);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: 1px solid transparent;
+}
+
+.container-item:hover {
+    background-color: #444;
+    transform: translateY(-1px);
+}
+
+.container-item.active {
+    border-color: var(--accent-color);
+    background-color: #2a2a2a;
+}
+
+.container-icon {
+    font-size: 18px;
+    margin-right: 12px;
+}
+
+.container-name {
+    font-weight: 500;
+    flex: 1;
+}
+
+.container-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+footer {
+    padding: var(--spacing);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.hint {
+    font-size: 11px;
+    color: var(--secondary-text);
+}
+
+/* Loading State */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}

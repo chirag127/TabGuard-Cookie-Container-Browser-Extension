@@ -1,0 +1,15 @@
+{
+    "name": "chromium-container-extension-assets",
+    "version": "1.0.0",
+    "description": "Asset generation for Chromium Container Extension",
+    "scripts": {
+        "generate-icons": "ts-node scripts/generate_icons.ts"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@types/sharp": "^0.31.0",
+        "sharp": "^0.32.0",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.0.0"
+    }
+}

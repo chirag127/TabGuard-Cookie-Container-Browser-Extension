@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Container Switcher</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <header>
+            <h1>Containers</h1>
+            <div id="current-status" class="status-badge">
+                <span id="current-icon"></span>
+                <span id="current-name">Loading...</span>
+            </div>
+        </header>
+
+        <main>
+            <ul id="container-list" class="container-list">
+                <!-- Containers will be injected here -->
+            </ul>
+        </main>
+
+        <footer>
+            <p class="hint">Switching containers will reload all tabs.</p>
+        </footer>
+
+        <script type="module" src="popup.js"></script>
+    </body>
+</html>
