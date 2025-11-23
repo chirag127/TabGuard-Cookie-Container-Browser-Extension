@@ -6,11 +6,40 @@
 // Constants
 const STORAGE_KEY_PREFIX = "container_cookies_";
 const CURRENT_CONTAINER_KEY = "current_container_id";
+const CONTAINER_DOMAIN_MAP_KEY = "container_domain_map"; // Maps containerId to domain
 const DEFAULT_CONTAINERS = [
-    { id: "default", name: "Default", color: "#808080", icon: "🌐" },
-    { id: "personal", name: "Personal", color: "#2196F3", icon: "👤" },
-    { id: "work", name: "Work", color: "#FF5722", icon: "💼" },
-    { id: "shopping", name: "Shopping", color: "#4CAF50", icon: "🛒" },
+    {
+        id: "default",
+        name: "Default",
+        color: "#808080",
+        icon: "🌐",
+        domain: null,
+        includeSubdomains: false,
+    },
+    {
+        id: "personal",
+        name: "Personal",
+        color: "#2196F3",
+        icon: "👤",
+        domain: "example.com",
+        includeSubdomains: true,
+    },
+    {
+        id: "work",
+        name: "Work",
+        color: "#FF5722",
+        icon: "💼",
+        domain: "work.example.com",
+        includeSubdomains: true,
+    },
+    {
+        id: "shopping",
+        name: "Shopping",
+        color: "#4CAF50",
+        icon: "🛒",
+        domain: "amazon.com",
+        includeSubdomains: true,
+    },
 ];
 
 /**
@@ -28,6 +57,57 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 
 /**
+ * Extract clean domain from URL
+ */
+function extractDomain(url) {
+    try {
+        const urlObj = new URL(url);
+        return urlObj.hostname;
+    } catch (e) {
+        console.warn("Failed to extract domain from:", url);
+        return null;
+    }
+}
+
+/**
+ * Check if a cookie's domain matches the target domain
+ * @param {string} cookieDomain - Cookie's domain (may start with '.')
+ * @param {string} targetDomain - Target domain to match
+ * @param {boolean} includeSubdomains - Whether to include subdomains
+ */
+function matchesDomain(cookieDomain, targetDomain, includeSubdomains) {
+    if (!targetDomain) return true; // No domain filter means match all
+
+    // Normalize cookie domain (remove leading dot)
+    const normalizedCookieDomain = cookieDomain.startsWith(".")
+        ? cookieDomain.substring(1)
+        : cookieDomain;
+
+    // Exact match
+    if (normalizedCookieDomain === targetDomain) {
+        return true;
+    }
+
+    // Subdomain match
+    if (
+        includeSubdomains &&
+        normalizedCookieDomain.endsWith("." + targetDomain)
+    ) {
+        return true;
+    }
+
+    // Parent domain match (cookie for .example.com matches example.com)
+    if (
+        includeSubdomains &&
+        targetDomain.endsWith("." + normalizedCookieDomain)
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * Helper: Construct a URL from domain and path for chrome.cookies.set
  */
 function getCookieUrl(cookie) {
@@ -42,23 +122,50 @@ function getCookieUrl(cookie) {
 }
 
 /**
- * Save all current cookies to storage for the given container ID.
+ * Save current cookies to storage for the given container ID.
+ * Only saves cookies matching the container's domain.
+ * @param {string} containerId - Container ID
+ * @param {string} domain - Domain to filter cookies (null for all)
+ * @param {boolean} includeSubdomains - Whether to include subdomains
  */
-async function saveCurrentSession(containerId) {
-    const cookies = await chrome.cookies.getAll({});
+async function saveCurrentSession(
+    containerId,
+    domain = null,
+    includeSubdomains = false
+) {
+    const allCookies = await chrome.cookies.getAll({});
+
+    // Filter cookies by domain if specified
+    const cookies = domain
+        ? allCookies.filter((cookie) =>
+              matchesDomain(cookie.domain, domain, includeSubdomains)
+          )
+        : allCookies;
+
     const storageKey = STORAGE_KEY_PREFIX + containerId;
     await chrome.storage.local.set({ [storageKey]: cookies });
     console.log(
-        `Saved ${cookies.length} cookies for container: ${containerId}`
+        `Saved ${cookies.length} cookies for container: ${containerId}` +
+            (domain ? ` (domain: ${domain})` : "")
     );
 }
 
 /**
- * Clear all cookies from the browser.
+ * Clear cookies from the browser for a specific domain.
+ * @param {string} domain - Domain to clear cookies for (null for all)
+ * @param {boolean} includeSubdomains - Whether to include subdomains
  */
-async function clearBrowserSession() {
-    const cookies = await chrome.cookies.getAll({});
-    const promises = cookies.map((cookie) => {
+async function clearBrowserSession(domain = null, includeSubdomains = false) {
+    const allCookies = await chrome.cookies.getAll({});
+
+    // Filter cookies by domain if specified
+    const cookiesToClear = domain
+        ? allCookies.filter((cookie) =>
+              matchesDomain(cookie.domain, domain, includeSubdomains)
+          )
+        : allCookies;
+
+    const promises = cookiesToClear.map((cookie) => {
         const url = getCookieUrl(cookie);
         return chrome.cookies.remove({
             url: url,
@@ -67,16 +174,34 @@ async function clearBrowserSession() {
         });
     });
     await Promise.all(promises);
-    console.log(`Cleared ${cookies.length} cookies.`);
+    console.log(
+        `Cleared ${cookiesToClear.length} cookies` +
+            (domain ? ` for domain: ${domain}` : "")
+    );
 }
 
 /**
  * Restore cookies from storage for the given container ID.
+ * Only restores cookies matching the container's domain.
+ * @param {string} containerId - Container ID
+ * @param {string} domain - Domain to filter cookies (null for all)
+ * @param {boolean} includeSubdomains - Whether to include subdomains
  */
-async function restoreSession(containerId) {
+async function restoreSession(
+    containerId,
+    domain = null,
+    includeSubdomains = false
+) {
     const storageKey = STORAGE_KEY_PREFIX + containerId;
     const result = await chrome.storage.local.get(storageKey);
-    const cookies = result[storageKey] || [];
+    const allCookies = result[storageKey] || [];
+
+    // Filter cookies by domain if specified
+    const cookies = domain
+        ? allCookies.filter((cookie) =>
+              matchesDomain(cookie.domain, domain, includeSubdomains)
+          )
+        : allCookies;
 
     const promises = cookies.map((cookie) => {
         // Prepare the cookie object for chrome.cookies.set
@@ -107,46 +232,103 @@ async function restoreSession(containerId) {
 
     await Promise.all(promises);
     console.log(
-        `Restored ${cookies.length} cookies for container: ${containerId}`
+        `Restored ${cookies.length} cookies for container: ${containerId}` +
+            (domain ? ` (domain: ${domain})` : "")
     );
 }
 
 /**
- * Switch from current container to target container.
+ * Switch from current container to target container for a specific domain.
+ * @param {string} targetContainerId - Target container ID
+ * @param {string} targetDomain - Domain to switch (required for site-specific containers)
+ * @param {boolean} includeSubdomains - Whether to include subdomains
  */
-async function switchContainer(targetContainerId) {
-    // 1. Get current container ID
-    const result = await chrome.storage.local.get(CURRENT_CONTAINER_KEY);
-    const currentContainerId = result[CURRENT_CONTAINER_KEY] || "default";
+async function switchContainer(
+    targetContainerId,
+    targetDomain = null,
+    includeSubdomains = false
+) {
+    // 1. Get current container and containers list
+    const storageData = await chrome.storage.local.get([
+        CURRENT_CONTAINER_KEY,
+        "containers",
+    ]);
+    const currentContainerId = storageData[CURRENT_CONTAINER_KEY] || "default";
+    const containers = storageData.containers || [];
 
-    if (currentContainerId === targetContainerId) {
-        console.log("Already in target container.");
+    // Find current and target container info
+    const currentContainer = containers.find(
+        (c) => c.id === currentContainerId
+    );
+    const targetContainer = containers.find((c) => c.id === targetContainerId);
+
+    if (!targetContainer) {
+        console.error("Target container not found:", targetContainerId);
+        return;
+    }
+
+    // Use container's domain if not explicitly provided
+    const domain = targetDomain || targetContainer.domain;
+    const useSubdomains =
+        includeSubdomains || targetContainer.includeSubdomains || false;
+
+    if (
+        currentContainerId === targetContainerId &&
+        currentContainer?.domain === domain
+    ) {
+        console.log("Already in target container for this domain.");
         return;
     }
 
     console.log(
-        `Switching from ${currentContainerId} to ${targetContainerId}...`
+        `Switching from ${currentContainerId} to ${targetContainerId}...` +
+            (domain ? ` for domain: ${domain}` : "")
     );
 
-    // 2. Save current session
-    await saveCurrentSession(currentContainerId);
+    // 2. Save current session for this domain
+    if (currentContainer) {
+        const currentDomain = currentContainer.domain || domain;
+        const currentSubdomains =
+            currentContainer.includeSubdomains || useSubdomains;
+        await saveCurrentSession(
+            currentContainerId,
+            currentDomain,
+            currentSubdomains
+        );
+    }
 
-    // 3. Clear browser session
-    await clearBrowserSession();
+    // 3. Clear browser session for this domain only
+    await clearBrowserSession(domain, useSubdomains);
 
-    // 4. Restore target session
-    await restoreSession(targetContainerId);
+    // 4. Restore target session for this domain
+    await restoreSession(targetContainerId, domain, useSubdomains);
 
     // 5. Update current container ID
     await chrome.storage.local.set({
         [CURRENT_CONTAINER_KEY]: targetContainerId,
     });
 
-    // 6. Reload all tabs to apply new cookies (Optional but recommended)
+    // 6. Reload only tabs matching the domain
     const tabs = await chrome.tabs.query({});
-    tabs.forEach((tab) => chrome.tabs.reload(tab.id));
+    const tabsToReload = domain
+        ? tabs.filter((tab) => {
+              const tabDomain = extractDomain(tab.url);
+              return (
+                  tabDomain && matchesDomain(tabDomain, domain, useSubdomains)
+              );
+          })
+        : tabs;
 
-    console.log("Container switch complete.");
+    tabsToReload.forEach((tab) => {
+        if (tab.id) {
+            chrome.tabs.reload(tab.id);
+        }
+    });
+
+    console.log(
+        `Container switch complete. Reloaded ${tabsToReload.length} tabs` +
+            (domain ? ` for domain: ${domain}` : "")
+    );
 }
 
 /**
@@ -154,7 +336,11 @@ async function switchContainer(targetContainerId) {
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "switchContainer") {
-        switchContainer(request.containerId)
+        switchContainer(
+            request.containerId,
+            request.domain || null,
+            request.includeSubdomains || false
+        )
             .then(() => sendResponse({ success: true }))
             .catch((err) => {
                 console.error("Switch failed:", err);
@@ -168,6 +354,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             .get(["containers", CURRENT_CONTAINER_KEY])
             .then((data) => {
                 sendResponse(data);
+            });
+        return true;
+    }
+
+    if (request.action === "getCurrentTab") {
+        chrome.tabs
+            .query({ active: true, currentWindow: true })
+            .then((tabs) => {
+                if (tabs[0]) {
+                    const domain = extractDomain(tabs[0].url);
+                    sendResponse({ domain, url: tabs[0].url });
+                } else {
+                    sendResponse({ domain: null, url: null });
+                }
             });
         return true;
     }

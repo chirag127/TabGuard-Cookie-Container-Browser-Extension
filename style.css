@@ -49,6 +49,29 @@ h1 {
     gap: 6px;
 }
 
+.current-site-section {
+    padding: var(--spacing);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background-color: #252525;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.site-label {
+    color: var(--secondary-text);
+    font-weight: 500;
+}
+
+.site-value {
+    color: var(--accent-color);
+    font-family: "Courier New", monospace;
+    font-weight: 600;
+}
+
 main {
     flex: 1;
     padding: var(--spacing);
@@ -87,9 +110,22 @@ main {
     margin-right: 12px;
 }
 
+.container-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .container-name {
     font-weight: 500;
-    flex: 1;
+    font-size: 14px;
+}
+
+.container-domain {
+    font-size: 11px;
+    color: var(--secondary-text);
+    font-family: "Courier New", monospace;
 }
 
 .container-indicator {

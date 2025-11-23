@@ -15,6 +15,11 @@
             </div>
         </header>
 
+        <div class="current-site-section">
+            <span class="site-label">Current Site:</span>
+            <span id="current-site" class="site-value">-</span>
+        </div>
+
         <main>
             <ul id="container-list" class="container-list">
                 <!-- Containers will be injected here -->
@@ -22,7 +27,9 @@
         </main>
 
         <footer>
-            <p class="hint">Switching containers will reload all tabs.</p>
+            <p class="hint">
+                Switching containers will reload tabs for that site only.
+            </p>
         </footer>
 
         <script type="module" src="popup.js"></script>
