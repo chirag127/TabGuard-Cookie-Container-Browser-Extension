@@ -1,64 +1,47 @@
 # Bug Report
 
-Thank you for taking the time to report a bug. Please provide as much detail as possible so we can quickly diagnose and fix the issue.
+Thank you for reporting a bug! Please provide as much detail as possible to help us diagnose and fix the issue quickly.
 
-## Project Context
+## 1. Title
 
-*   **Repository:** `TabGuard-Cookie-Container-Browser-Extension`
-*   **URL:** `https://github.com/chirag127/TabGuard-Cookie-Container-Browser-Extension`
+A concise, descriptive summary of the bug.
 
----
+## 2. Environment
 
-## Bug Description
+*   **Browser:** (e.g., Chrome 126, Firefox 120, Edge 125)
+*   **Operating System:** (e.g., Windows 11, macOS Sonoma 14.5, Ubuntu 22.04)
+*   **Extension Version:** (If applicable, e.g., 1.2.3)
+*   **Manifest Version:** (e.g., Manifest V3)
 
-**Describe the bug clearly and concisely.** What did you expect to happen? What actually happened?
+## 3. Steps to Reproduce
 
-*   **Expected behavior:**
-    *   
-*   **Actual behavior:**
-    *   
+Provide a clear, step-by-step guide to reproduce the bug. Be specific!
 
-## Steps to Reproduce
+1.  [Step 1]
+2.  [Step 2]
+3.  [Step 3]
 
-**Please provide a step-by-step guide to reproduce the bug.** The more detailed, the better.
+## 4. Expected Behavior
 
-1.  
-2.  
-3.  
-4.  
+What did you expect to happen after following the steps above?
 
-## Environment
+## 5. Actual Behavior
 
-**Please list the details of your environment.**
+What actually happened? Please describe the incorrect behavior.
 
-*   **Browser:** (e.g., Chrome 125, Firefox 120)
-*   **Browser Version:** 
-*   **Operating System:** (e.g., Windows 11, macOS Sonoma 14.5)
-*   **Operating System Version:** 
-*   **TabGuard Version:** (If applicable, or state "Latest")
+## 6. Screenshots / Videos (Optional)
 
-## Screenshots or Screen Recordings (Optional)
+If possible, attach screenshots or a short video demonstrating the bug. This is often very helpful.
 
-If possible, please attach screenshots or a screen recording that demonstrates the bug. This can significantly help in diagnosing the issue.
+## 7. Console Logs (Optional but Recommended)
 
-## Additional Information (Optional)
+If you can access your browser's developer console (usually by pressing F12), please copy and paste any relevant error messages or warnings here. This is crucial for diagnosing JavaScript issues.
 
-Any other context about the problem. For example, specific websites where the bug occurs, or any unusual configurations.
+## 8. Additional Context (Optional)
+
+Any other information that might be relevant, such as specific websites where the bug occurs, related extensions you have installed, or any workarounds you have found.
 
 ---
 
-## AI Agent Directives (Reference)
-
-This section is for reference and should align with the repository's `AGENTS.md`.
-
-*   **Project Name:** `TabGuard-Cookie-Container-Browser-Extension`
-*   **Primary Function:** Cookie Containerization for Chromium Browsers
-*   **Platform:** Browser Extension (Chromium)
-*   **Language:** JavaScript
-*   **Core Principles:** Privacy-First, Security, Isolation, Efficiency.
-*   **Apex Tech Stack:** JavaScript (Modern standards), Browser Extension APIs.
-*   **Linting/Formatting:** Biome (as per Apex Standards, adapted for JS)
-*   **Testing:** Vitest/Playwright (as per Apex Standards, adapted for JS Extensions)
-*   **Architecture:** Clean, modular JavaScript, leveraging Browser Extension APIs directly.
-
-*Refer to the main `AGENTS.md` for full directives.*
+**Repository:** [ContainerFlow-Cookie-Isolation-Browser-Extension](https://github.com/chirag127/ContainerFlow-Cookie-Isolation-Browser-Extension)
+**Username:** chirag127
